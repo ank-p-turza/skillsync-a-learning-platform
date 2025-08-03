@@ -1,14 +1,16 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsNumberString, IsOptional, IsString, Length, Matches } from "class-validator";
+import { IsEmail, IsEnum, IsNotEmpty, IsNumberString, IsOptional, IsPort, IsString, Length, Matches } from "class-validator";
 import { LearnerGender } from "../gender-enum";
 import { Transform } from "class-transformer";
-export class LearnerDto{
+export class LearnerUpdateDto{
+    @IsOptional()
     id : string;
 
-    @IsOptional()
     @IsNotEmpty()
     @IsString()
+    @IsOptional()
     name : string;
 
+    @IsOptional()
     @IsNotEmpty()
     @IsEmail()
     @Matches(/^[\w.%+-]+@aiub\.edu$/, {
@@ -16,6 +18,7 @@ export class LearnerDto{
     })
     email : string;
 
+    @IsOptional()
     @IsNumberString({}, {
         message: 'Phone number must contain only numbers'
     })
@@ -28,6 +31,7 @@ export class LearnerDto{
     })
     phone : string;
 
+    @IsOptional()
     @IsNotEmpty()
     @IsString()
     @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9\s]).{8,}$/, {
