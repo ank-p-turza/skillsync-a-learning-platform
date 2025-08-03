@@ -1,6 +1,6 @@
-import { IsEmail, IsString, IsInt, IsOptional, IsNumber, Min, Matches } from 'class-validator';
+import { IsEmail, IsString, IsInt, IsOptional, IsNumber, Min, Matches, Length, IsIn } from 'class-validator';
 
-export class CreateAdminDto {
+/*export class CreateAdminDto {
    @Matches(/^[a-zA-Z]+$/, { message: 'Name must contain only alphabets' })
   name: string;
 
@@ -27,7 +27,7 @@ export class CreateUserDto {
   @IsString()
   role: string;
 }
-
+*/
 export class CreateCourseDto {
   @IsString()
   title: string;
@@ -83,4 +83,21 @@ export class CreateReviewDto {
 
   @IsString()
   comment: string;
+}
+// New
+export class CreateAdminDto
+{
+  @IsString()
+  @Length(1, 100)
+  fullname : string;
+  @IsInt()
+  @Min(0)
+  age : number;
+
+}
+export class UpdateAdminStatusDto
+{
+  @IsString()
+  @IsIn(['active', 'inactive'])
+  status : 'active' | 'inactive';
 }

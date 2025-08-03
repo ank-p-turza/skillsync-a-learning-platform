@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AdminModule } from './admin/admin.module';
-//import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 
 @Module({
-  imports: [AdminModule, /*TypeOrmModule.forRoot
+  imports: [AdminModule, TypeOrmModule.forRoot
     (
       {
         type: 'postgres',
@@ -18,7 +18,7 @@ import { AdminModule } from './admin/admin.module';
         autoLoadEntities: true,
         synchronize: true,
       }
-    ),*/
+    ),
   ],
   controllers: [AppController],
   providers: [AppService],

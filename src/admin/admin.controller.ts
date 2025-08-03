@@ -1,16 +1,19 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Res, UploadedFile, UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, Res, UploadedFile, UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common";
 import { AdminService } from "./admin.service";
 import {
-  CreateAdminDto,
-  CreateUserDto,
+  //CreateAdminDto,
+  //CreateUserDto,
   CreateCourseDto,
   CreateReportDto,
   CreateNotificationDto,
   UpdateSettingDto,
   CreateReviewDto,
+  CreateAdminDto,
+  UpdateAdminStatusDto,
 } from "./admin.dto";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage, MulterError } from "multer";
+import { NewAdmin } from "./admin.entity";
 
 @Controller('admin')
 export class AdminController
@@ -33,7 +36,7 @@ export class AdminController
   {
     return this.adminService.getId(name);
   }
-  @Post()
+  /*@Post()
    @UsePipes(new ValidationPipe())
   createAdmin(@Body() createAdminDto : CreateAdminDto)
   {
@@ -79,6 +82,7 @@ export class AdminController
   {
     return this.adminService.deleteUser(id);
   }
+    */
   @Post('courses')
   @UsePipes(new ValidationPipe())
   createCourse(@Body() createDto: CreateCourseDto): string
@@ -228,10 +232,38 @@ console.log(file.destination)
 getImages(@Param('name') name, @Res() res) {
 res.sendFile(name,{ root: './uploads' })
 }
-@Get(':id')
+/*@Get(':id')
   getAdmin(@Param('id', ParseIntPipe) adminId : number)
   {
     return this.adminService.getAdmin(adminId);
   }
+    */
+
+  // New
+   @Post('newadmin')
+   @UsePipes(new ValidationPipe())
+   createAdmin(@Body() createAdminDto : CreateAdminDto): Promise<NewAdmin>
+   {
+    return this.adminService.createAdmin(createAdminDto);
+
+   }
+   @Patch(':id/status')
+   @UsePipes(new ValidationPipe())
+   updateStatus(@Param('id', ParseIntPipe)id : number, @Body() updateAdminStatusDto : UpdateAdminStatusDto) : Promise<NewAdmin>
+   {
+    return this.adminService.updateStatus(id, updateAdminStatusDto);
+   }
+   @Get('inactive')
+   getInactiveAdmins(): Promise <NewAdmin[]>
+   {
+    return this.adminService.getInactiveAdmins();
+   }
+   @Get('older')
+   getOlderAdmins(): Promise<NewAdmin[]>
+   {
+    return this.adminService.getOlderAdmins();
+   }
+
+
 
 }

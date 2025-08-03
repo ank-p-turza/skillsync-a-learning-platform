@@ -1,11 +1,16 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
-import { CreateAdminDto, CreateCourseDto, CreateNotificationDto, CreateReportDto, CreateReviewDto, CreateUserDto, UpdateSettingDto } from "./admin.dto";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import {  CreateAdminDto, CreateCourseDto, CreateNotificationDto, CreateReportDto, CreateReviewDto,  UpdateAdminStatusDto,  UpdateSettingDto } from "./admin.dto";
+import { InjectRepository } from "@nestjs/typeorm";
+import {  MoreThan, Repository } from "typeorm";
+import { NewAdmin } from "./admin.entity";
+
 
 @Injectable()
 export class AdminService
 {
-    private readonly validAccessLevels = ['super_admin', 'moderator', 'analyst'];
-    private readonly validUserRoles = ['learner', 'instructor'];
+  constructor(@InjectRepository(NewAdmin) private adminRepository :Repository<NewAdmin>) {}
+   // private readonly validAccessLevels = ['super_admin', 'moderator', 'analyst'];
+    //private readonly validUserRoles = ['learner', 'instructor'];
     private readonly validCourseStatus = ['pending', 'approved', 'rejected'];
     private readonly validReportStatus = ['pending', 'resolved', 'dismissed'];
     signIn(): string
@@ -20,7 +25,7 @@ export class AdminService
     {
         return `The given name is ${name}`;
     }
-    createAdmin (createAdminDto : CreateAdminDto): string
+   /* createAdmin (createAdminDto : CreateAdminDto): string
     {
         console.log('Name :', createAdminDto.name);
         if (!this.validAccessLevels.includes(createAdminDto.accessLevel))
@@ -84,6 +89,7 @@ export class AdminService
   {
     return `User with id ${id} deleted`;
   }
+    */
   createCourse (dto: CreateCourseDto): string
   {
     console.log('Title :', dto.title);
@@ -192,4 +198,32 @@ export class AdminService
   {
     return [{ id: 1, title: 'Mock Notification', message: 'Mock Message', recipient: 'all' }];
   }
+  // New
+  
+  async createAdmin(createAdminDto : CreateAdminDto) : Promise<NewAdmin>
+  {
+    const newAdmin = this.adminRepository.create(createAdminDto);
+    return this.adminRepository.save(newAdmin);
   }
+  async updateStatus(id : number, updateAdminStatusDto : UpdateAdminStatusDto): Promise<NewAdmin>
+  {
+    const admin = await this.adminRepository.findOneBy({id});
+    if (!admin)
+    {
+      throw new NotFoundException(`Admin id ${id} not found`);
+    }
+    await this.adminRepository.update(id, updateAdminStatusDto);
+    return this.adminRepository.findOneBy({id}) as Promise<NewAdmin>;
+
+
+  }
+  async getInactiveAdmins(): Promise<NewAdmin[]>
+  {
+    return this.adminRepository.find({ where: {status: 'inactive'},});
+  }
+
+async getOlderAdmins(): Promise<NewAdmin[]>
+{
+  return this.adminRepository.find({where : {age : MoreThan(25)},});
+}
+}
