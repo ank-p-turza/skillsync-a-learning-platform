@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BeforeInsert, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { GenderEnum } from "../common/gender-enum";
 
 @Entity('learners')
@@ -43,6 +43,9 @@ export class Learner{
 
     @Column({ type: 'timestamptz' , nullable : true})
     expires_at : Date;
+
+    @OneToMany('Enrollment', 'learner')
+    enrollments: any[];
 
     @CreateDateColumn({
         type: 'timestamptz',

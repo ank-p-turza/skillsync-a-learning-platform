@@ -3,6 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LearnerModule } from './learner/learner.module';
 import { InstructorModule } from './instructor/instructor.module';
+import { CourseModule } from './course/course.module';
+import { EnrollmentModule } from './enrollment/enrollment.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
@@ -13,7 +15,9 @@ import { AuthModule } from './auth/auth.module';
       isGlobal: true
     }),
     LearnerModule,
-    InstructorModule, 
+    InstructorModule,
+    CourseModule,
+    EnrollmentModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
