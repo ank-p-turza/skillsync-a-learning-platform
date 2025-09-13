@@ -14,7 +14,7 @@ export class Learner{
     email : string;
 
     
-    @Column({unique: true})
+    @Column({unique: true, nullable : true})
     phone : string;
     
     @Column()
@@ -44,7 +44,10 @@ export class Learner{
     @Column({ type: 'timestamptz' , nullable : true})
     expires_at : Date;
 
-    @OneToMany('Enrollment', 'learner')
+    @OneToMany('Enrollment', 'learner',{
+        cascade: true,
+        onDelete: 'CASCADE'
+    })
     enrollments: any[];
 
     @CreateDateColumn({

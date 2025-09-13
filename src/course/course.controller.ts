@@ -9,12 +9,16 @@ import {
     UseGuards,
     Request,
     ParseUUIDPipe,
+    UsePipes,
+    ValidationPipe,
 } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CourseStatus } from './course-status.enum';
+import { features } from 'process';
+import { FeaturedCoursesDto } from './dto/featured-courses.dto';
 
 @Controller('courses')
 export class CourseController {
@@ -47,6 +51,12 @@ export class CourseController {
         return this.courseService.findAllByInstructor(req.user.id);
     }
 
+    @Get('featured')
+    async getFeatured() {
+        return await this.courseService.getFeaturedCourses();
+    }
+
+
     @Get(':id')
     findOne(@Param('id', ParseUUIDPipe) id: string) {
         return this.courseService.findOne(id);
@@ -75,5 +85,19 @@ export class CourseController {
     @UseGuards(JwtAuthGuard)
     remove(@Param('id', ParseUUIDPipe) id: string, @Request() req) {
         return this.courseService.remove(id, req.user.id);
+    }
+
+    
+    @Post('featured')
+    @UsePipes(new ValidationPipe())
+    @UseGuards(JwtAuthGuard)
+    async addFeatured(@Body() featuredCoursesDto : FeaturedCoursesDto, @Request() req){
+        return await this.courseService.addCoursesAsFeatured(featuredCoursesDto.courseIds, req.user);
+    }
+
+
+    @Get(':id/instructor')
+    async getInstructorId(@Param('id') id : string){
+        return await this.courseService.getInstructorFromCourse(id);
     }
 }

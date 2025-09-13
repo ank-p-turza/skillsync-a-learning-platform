@@ -13,9 +13,6 @@ export class LearnerUpdateDto{
     @IsOptional()
     @IsNotEmpty()
     @IsEmail()
-    @Matches(/^[\w.%+-]+@aiub\.edu$/, {
-        message: 'Email must be from aiub.edu domain',
-    })
     email : string;
 
     @IsOptional()

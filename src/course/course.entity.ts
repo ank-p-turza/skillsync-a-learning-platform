@@ -20,6 +20,9 @@ export class Course {
     @Column({ type: 'enum', enum: CourseStatus, default: CourseStatus.PENDING })
     status: CourseStatus;
 
+    @Column({default : false, nullable: true})
+    isFeatured : boolean;
+
     @Column({ name: 'instructor_id' })
     instructorId: string;
 

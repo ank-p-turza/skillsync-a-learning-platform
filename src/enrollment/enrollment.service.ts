@@ -52,28 +52,28 @@ export class EnrollmentService {
 
     async findAll(): Promise<Enrollment[]> {
         return await this.enrollmentRepository.find({
-            relations: ['course', 'learner'],
+            //relations: ['course', 'learner'],
         });
     }
 
     async findByCourse(courseId: string): Promise<Enrollment[]> {
         return await this.enrollmentRepository.find({
             where: { courseId },
-            relations: ['learner'],
+            //relations: ['learner'],
         });
     }
 
     async findByLearner(learnerId: string): Promise<Enrollment[]> {
         return await this.enrollmentRepository.find({
             where: { learnerId },
-            relations: ['course', 'course.instructor'],
+            //relations: ['course', 'course.instructor'],
         });
     }
 
     async findOne(id: string): Promise<Enrollment> {
         const enrollment = await this.enrollmentRepository.findOne({
             where: { id },
-            relations: ['course', 'learner'],
+            //relations: ['course', 'learner'],
         });
 
         if (!enrollment) {
@@ -84,7 +84,7 @@ export class EnrollmentService {
     }
 
     async remove(id: string): Promise<void> {
-        await this.findOne(id); // Verify enrollment exists
+        await this.findOne(id);
         await this.enrollmentRepository.delete(id);
     }
 

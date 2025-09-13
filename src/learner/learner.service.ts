@@ -6,10 +6,15 @@ import { Repository } from 'typeorm';
 import { UserPayload } from '../auth/user-payload.interface';
 import { RolesEnum } from '../auth/roles.enum';
 import * as bcrypt from 'bcrypt';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { EmailService } from '../common/email/email.service';
 
 @Injectable()
 export class LearnerService {
-    constructor(@InjectRepository(Learner) private readonly learnerRepo : Repository<Learner>){}
+    constructor(
+        @InjectRepository(Learner) private readonly learnerRepo : Repository<Learner>,
+        private readonly emailService: EmailService
+    ){}
 
     otpgenerator(length : number) : string {
         let otp = '';
@@ -39,13 +44,17 @@ export class LearnerService {
                 otp
             });
             await this.learnerRepo.save(newLearner);
-            return {message : 'User created'};
+            
+            await this.emailService.sendOTP(email, otp, name);
+            
+            return {message : 'User created successfully. Please check your email for OTP verification.'};
         }
         catch(error){
-            console.log(error);
+            //console.log(error);
             if(error.code === '23505'){
                 throw new ConflictException("User already exist");
             }
+            throw new BadRequestException('Failed to create user');
         }
     }
 
@@ -93,12 +102,12 @@ export class LearnerService {
 
     
 
-    async deleteLearnerById(id : string) : Promise<void> {
-        const foundLearner = await this.getLearnerById(id);
+    async deleteLearnerById(userPayload : UserPayload) : Promise<void> {
+        const foundLearner = await this.getLearnerById(userPayload.id);
         if(!foundLearner){
             throw new BadRequestException("Something went wrong");
         }
-        await this.learnerRepo.delete({id : id});        
+        await this.learnerRepo.delete({id : userPayload.id});        
     }
 
     async getAllLearners() : Promise<Learner[]>{
@@ -142,6 +151,50 @@ export class LearnerService {
             console.log(error);
         }
         return await this.getLearnerById(id);
+    }
+
+    async verifyOTP(verifyOtpDto: VerifyOtpDto): Promise<{message: string, user: UserPayload}> {
+        let count = 0;
+        const { email, otp } = verifyOtpDto;
+        
+        const learner = await this.learnerRepo.findOne({
+            where: { email }
+        });
+
+        if (!learner) {
+            throw new NotFoundException('User not found');
+        }
+
+        if (learner.is_verified) {
+            throw new BadRequestException('User is already verified');
+        }
+
+        if (learner.otp !== otp) {
+            count++;
+            throw new BadRequestException('Invalid OTP');
+        }
+
+        const now = new Date();
+        if (learner.expires_at && now > learner.expires_at) {
+            throw new BadRequestException('OTP has expired');
+        }
+
+        learner.is_verified = true;
+        learner.otp = null;
+        learner.expires_at = null;
+        
+        await this.learnerRepo.save(learner);
+
+        const { password, ...others } = learner;
+        const userPayload: UserPayload = {
+            ...others,
+            role: RolesEnum.LEARNER
+        };
+
+        return {
+            message: 'Account verified successfully',
+            user: userPayload
+        };
     }
 
     

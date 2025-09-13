@@ -1,16 +1,19 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './course.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { CourseStatus } from './course-status.enum';
+import { InstructorService } from 'src/instructor/instructor.service';
+import { RolesEnum } from 'src/auth/roles.enum';
 
 @Injectable()
 export class CourseService {
     constructor(
         @InjectRepository(Course)
         private readonly courseRepository: Repository<Course>,
+        private readonly instructorService : InstructorService
     ) {}
 
     async create(createCourseDto: CreateCourseDto, instructorId: string): Promise<Course> {
@@ -83,5 +86,52 @@ export class CourseService {
         await this.findOne(id);
         await this.courseRepository.update(id, { status });
         return await this.findOne(id);
+    }
+
+    async getInstructorFromCourse(id : string){
+        const course = await this.courseRepository.findOneBy({ id: id });
+        if (!course) {
+            throw new NotFoundException('Course Not Found');
+        }
+        
+        const instructor = await this.instructorService.getInstructorById(course.instructorId);
+        return { instructor: instructor };
+
+    }
+
+    async addCoursesAsFeatured(courses : string[], user : any){
+        if(user && user.role === RolesEnum.INSTRUCTOR){
+            let result : any[] = [];
+            for(const courseId of courses){
+                const course = await this.findOne(courseId);
+                if(course){
+                    if(course.isFeatured === true){
+                        result.push({message : `Course ${courseId} already in featured.`});
+                    }
+                    else{
+                        course.isFeatured = true;
+                        this.courseRepository.save(course);
+                        result.push({message : `Course ${courseId} added as featured.`});
+                    }
+                }
+                else{
+                    result.push({message : `Error course ${courseId} not found`});
+                }
+            }
+            return result;          
+        }
+        else{
+            throw new UnauthorizedException('You dont have the access privilage');
+        }
+    }
+
+    async getFeaturedCourses(){
+        const courses = await this.courseRepository.find({where:{isFeatured:true}});
+        if(courses){
+            return courses;
+        }
+        else{
+            throw new UnauthorizedException('Featured courses not found');
+        }
     }
 }

@@ -1,3 +1,5 @@
+import { Course } from "src/course/course.entity";
+import { Learner } from "src/learner/learner.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('enrollments')
@@ -18,11 +20,11 @@ export class Enrollment {
     @Column({ name: 'learner_id' })
     learnerId: string;
 
-    @ManyToOne('Course', 'enrollments')
+    @ManyToOne(()=>Course, course=>course.enrollments)
     @JoinColumn({ name: 'course_id' })
     course: any;
 
-    @ManyToOne('Learner', 'enrollments')
+    @ManyToOne(()=>Learner, learner=>learner.enrollments, {onDelete: 'CASCADE'})
     @JoinColumn({ name: 'learner_id' })
     learner: any;
 

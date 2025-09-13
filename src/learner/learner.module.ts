@@ -3,9 +3,13 @@ import { LearnerService } from './learner.service';
 import { LearnerController } from './learner.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Learner } from './learner.entity';
+import { EmailModule } from '../common/email/email.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Learner])],
+  imports: [
+    TypeOrmModule.forFeature([Learner]),
+    EmailModule
+  ],
   providers: [LearnerService],
   controllers: [LearnerController],
   exports : [LearnerService]

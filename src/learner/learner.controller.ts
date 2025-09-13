@@ -1,4 +1,4 @@
-import { Request, Controller, Body, Param, Get, Patch, Delete, UseGuards, UnauthorizedException, ValidationPipe, UsePipes, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Request, Controller, Body, Param, Get, Patch, Delete, UseGuards, UnauthorizedException, ValidationPipe, UsePipes, UseInterceptors, UploadedFile, Post } from '@nestjs/common';
 import { LearnerService } from './learner.service';
 import { UserPayload } from '../auth/user-payload.interface';
 import { LearnerUpdateDto } from './dto/learner-update.dto';
@@ -7,10 +7,17 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesEnum } from 'src/auth/roles.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage, MulterError } from 'multer';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 
 @Controller('learner')
 export class LearnerController {
     constructor (private readonly learnerService : LearnerService){}
+    
+    @Post('/verify')
+    @UsePipes(new ValidationPipe())
+    async verifyOTP(@Body() verifyOtpDto: VerifyOtpDto) {
+        return await this.learnerService.verifyOTP(verifyOtpDto);
+    }
     
     @UseGuards(JwtAuthGuard)
     @Get("/profile")
@@ -30,9 +37,10 @@ export class LearnerController {
         }
     }
 
-    @Delete('/:id')
-    async deleteUser(@Param('id') id : string) : Promise<void> {
-        await this.learnerService.deleteLearnerById(id);
+    @Delete()
+    @UseGuards(JwtAuthGuard)
+    async deleteUser(@Request() req) : Promise<void> {
+        await this.learnerService.deleteLearnerById(req.user);
     }
 
     @UseGuards(JwtAuthGuard)
