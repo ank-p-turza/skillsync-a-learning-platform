@@ -84,6 +84,12 @@ export class LearnerController {
         return await this.learnerService.updateImageById(req.user.id, image.path);
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Get("/test")
+    async test(@Request() req) : Promise<{isOkay:boolean}>{
+        return {isOkay : true};
+    }
+
 
 
 }
