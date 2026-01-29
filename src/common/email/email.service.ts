@@ -7,8 +7,8 @@ export class EmailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: 'mail.vatibangla.com',
-      port: 465,
+      host: process.env.EMAIL_SERVER_ADDR,
+      port: +process.env.EMAIL_SERVER_PORT,
       secure: true,
       auth: {
         user: process.env.EMAIL_USER, 
